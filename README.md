@@ -136,9 +136,72 @@ The templates are driven by the maps in the values.yaml files -- they contains a
 
 (above created with [md-file-tree](https://github.com/michalbe/md-file-tree))
 
-### Example output manifests:
+To make use of these charts, I create yet another set of ArgoCD Application CRDs. For example, with my argocd-test deployment, I'd deploy the following CRDs into my argocd namespace:
 
-Run `helm template argocd-example-apps -f argocd-example-apps/test-values.yaml`
+```yaml
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: argocd
+spec:
+  description: project for management of ArgoCD itself
+  # some of my apps within argocd project need to create cluster resources
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  destinations:
+  - namespace: argocd
+    server: https://kubernetes.default.svc
+  sourceRepos:
+  - https://github.com/stevesea/argocd-helm-app-of-apps-example.git
+  #
+  # lots of other repos here
+  #
+  - https://github.com/helm/charts.git
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test-apps
+spec:
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  project: argocd
+  syncPolicy:
+    automated:
+      prune: true
+  source:
+    path: argocd-example-apps
+    repoURL: https://github.com/stevesea/argocd-helm-app-of-apps-example.git
+    targetRevision: test
+    helm:
+      valueFiles:
+      - test-values.yaml
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test-infra
+spec:
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  project: argocd
+  syncPolicy:
+    automated:
+      prune: true
+  source:
+    path: argocd-example-infra
+    repoURL: https://github.com/stevesea/argocd-helm-app-of-apps-example.git
+    targetRevision: test
+    helm:
+      valueFiles:
+      - test-values.yaml
+```
+
+The above Application CRDs use helm to generate the 'test' Application CRDs and deploy them to the `argocd` namespace. To see what what those manifests look like, run `helm template argocd-example-apps -f argocd-example-apps/test-values.yaml`
 
 You'll get this output:
 
