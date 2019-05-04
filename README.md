@@ -112,25 +112,26 @@ To promote a change from the `test` to `staging` environments (or `staging` to `
 
 In this repository, there are two Helm charts. The Helm charts have two templates -- one that creates AppProject and another that creates Applications.
 
-The templates are driven by the maps in the values.yaml files -- they contains a map of projects, and a map of applications. In each chart, there are values overrides for each environment. 
+The templates are driven by the maps in the values.yaml files -- they contains a map of projects, and a map of applications. In each chart, there are values overrides for each environment.
 
-```
-|-- argocd-example-apps
-|   |-- templates
-|   |   |-- applications.yaml
-|   |   `-- projects.yaml
-|   |-- Chart.yaml
-|   |-- production-values.yaml
-|   |-- staging-values.yaml
-|   |-- test-values.yaml
-|   `-- values.yaml
-`-- argocd-example-infra
-    |-- templates
-    |   |-- applications.yaml
-    |   `-- projects.yaml
-    |-- Chart.yaml
-    |-- production-values.yaml
-    |-- staging-values.yaml
-    |-- test-values.yaml
-    `-- values.yaml
-```
+- __argocd-helm-app-of-apps-example__
+  - __argocd-example-infra__
+    - [Chart.yaml](argocd-helm-app-of-apps-example/argocd-example-infra/Chart.yaml)
+    - [production-values.yaml](argocd-helm-app-of-apps-example/argocd-example-infra/production-values.yaml)
+    - __templates__
+      - [applications.yaml](argocd-helm-app-of-apps-example/argocd-example-infra/templates/applications.yaml)
+      - [projects.yaml](argocd-helm-app-of-apps-example/argocd-example-infra/templates/projects.yaml)
+    - [staging-values.yaml](argocd-helm-app-of-apps-example/argocd-example-infra/staging-values.yaml)
+    - [test-values.yaml](argocd-helm-app-of-apps-example/argocd-example-infra/test-values.yaml)
+    - [values.yaml](argocd-helm-app-of-apps-example/argocd-example-infra/values.yaml)
+  - __argocd-example-apps__
+    - [Chart.yaml](argocd-helm-app-of-apps-example/argocd-example-apps/Chart.yaml)
+    - [staging-values.yaml](argocd-helm-app-of-apps-example/argocd-example-apps/staging-values.yaml)
+    - [production-values.yaml](argocd-helm-app-of-apps-example/argocd-example-apps/production-values.yaml)
+    - [test-values.yaml](argocd-helm-app-of-apps-example/argocd-example-apps/test-values.yaml)
+    - __templates__
+      - [applications.yaml](argocd-helm-app-of-apps-example/argocd-example-apps/templates/applications.yaml)
+      - [projects.yaml](argocd-helm-app-of-apps-example/argocd-example-apps/templates/projects.yaml)
+    - [values.yaml](argocd-helm-app-of-apps-example/argocd-example-apps/values.yaml)
+
+(above created with md-file-tree)
