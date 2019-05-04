@@ -49,16 +49,14 @@ This example is currently only focused on the problem of generating the Applicat
 * different clusters per env -- the values files all use `https://kubernetes.default.svc` as the destination (this is the local cluster that ArgoCD is running within), to deploy to different clusters per env, you'd change that to the cluster IP of your target cluster.
 
 
-## This Example in Context
+## The Context of this Example
 
 This repository holds one example of how to manage one aspect of Continuous Deployment with ArgoCD, and in one particular way -- a helm template that creates a bunch of Application/AppProject CRDs for the different target environments. It fit our needs, and supported the developer workflow we found convenient. Your needs will be different, and you'll likely weigh the factors of your CD process differently than I did.
 
 
-### Context
-
 We have a couple dozen microservices. An 'environment' is a cluster+namespace to which our services have been deployed. For example, the 'test' environment is all of our services deployed to a 'test' namespace in a particular cluster.
 
-#### Repositories
+### Repositories
 We split our microservice source code and the kubernetes manifests into separate repositories (go [here](https://argoproj.github.io/argo-cd/user-guide/best_practices/) for discussion of why that's useful) -- an 'application' repository and a 'deployment' repository.
 
 Example repository layout:
@@ -77,7 +75,7 @@ Example repository layout:
     * identity/ -- identity-related stuff in a subgroup to help isolate RBAC rules for it
       * service-accounts/ -- manifests for creating the k8s service accounts
 
-#### Branching Strategy and CI/CD Pipeline
+### Branching Strategy and CI/CD Pipeline
 
 There are a handful of different strategies for configure ArgoCD to [track changes in your git repositories](https://argoproj.github.io/argo-cd/user-guide/tracking_strategies/). I've chosen to do branch tracking.
 
@@ -109,3 +107,30 @@ To promote a change from the `test` to `staging` environments (or `staging` to `
 * developer/qa creates a Merge Request in the deployment repository
 * upon MR approval, the MR is merged to target branch
 * ArgoCD for the target environment is setup to auto-sync the manifests from the target branch into the appropriate Kubernetes cluster.
+
+## Finally, the example itself...
+
+In this repository, there are two Helm charts. The Helm charts have two templates -- one that creates AppProject and another that creates Applications.
+
+The templates are driven by the maps in the values.yaml files -- they contains a map of projects, and a map of applications. In each chart, there are values overrides for each environment. 
+
+```
+|-- argocd-example-apps
+|   |-- templates
+|   |   |-- applications.yaml
+|   |   `-- projects.yaml
+|   |-- Chart.yaml
+|   |-- production-values.yaml
+|   |-- staging-values.yaml
+|   |-- test-values.yaml
+|   `-- values.yaml
+`-- argocd-example-infra
+    |-- templates
+    |   |-- applications.yaml
+    |   `-- projects.yaml
+    |-- Chart.yaml
+    |-- production-values.yaml
+    |-- staging-values.yaml
+    |-- test-values.yaml
+    `-- values.yaml
+```
