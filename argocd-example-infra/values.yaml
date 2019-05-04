@@ -1,0 +1,88 @@
+# your override should supply an envName
+envName: null
+
+# if set, override all Applications to use this project
+projectOverride: null
+
+default:
+  project:
+    destinations: |
+      - namespace: {{ $.Values.default.app.destination.namespace | required "Missing proj dest namespace"}}
+        server: {{ $.Values.default.app.destination.server | required "Missing proj dest server" }}
+  app:
+    enableAutoSync: null
+    autoSyncPrune: true
+    destination:
+      namespace: null
+      server: null
+    project: null
+    source:
+      path: null
+      repoURL: null
+      targetRevision: HEAD
+
+      #Examples of how you might use extraSourceFields. depending on if you're using Helm or Kustomize for your apps
+      #
+      #extraSourceFields: |
+      #  helm:
+      #    valueFiles:
+      #    - {{ $.Values.envName }}-values.yaml
+      #  kustomize:
+      #    namePrefix: prod-
+    #extraFields: |
+    #  #Default fields you want on all applications, unless the app individually overrides.
+    #  # for example, here's how to ignore replicas if your chart uses HPA
+    #  ignoreDifferences:
+    #  - group: apps
+    #    kind: Deployment
+    #    jsonPointers:
+    #    - /spec/replicas
+
+projects:
+  infra:
+    description: 'infrastructure project'
+    sourceRepos:
+    - https://MY_INFRA_REPOSITORY/utils/*
+  infra-identity:
+    extraFields: |
+      clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+    description: 'infrastructure project - identity'
+    sourceRepos:
+    - https://MY_INFRA_REPOSITORY/identity/*
+
+applications:
+  k8s-service-accounts:
+    enabled: false
+    destination:
+      namespace: null
+      server: null
+    project: infra-identity
+    source:
+      path: "service-accounts"
+      repoURL: https://MY_INFRA_REPOSITORY/identity/k8s-service-accounts.git
+
+  service-discovery:
+    enabled: false
+    destination:
+      namespace: null
+      server: null
+    project: infra
+    source:
+      path: ./overlays/{{ $.Values.envName }}
+      repoURL: https://MY_INFRA_REPOSITORY/utils/service-discovery.git
+
+  infra-svc:
+    enabled: false
+    destination:
+      namespace: null
+      server: null
+    project: infra
+    source:
+      path: infra-svc
+      repoURL: https://MY_INFRA_REPOSITORY/utils/infra-svc.git
+      extraSourceFields: |
+        helm:
+          valueFiles:
+          - {{ $.Values.envName }}-values.yaml

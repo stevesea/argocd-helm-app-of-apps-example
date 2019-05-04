@@ -1,0 +1,94 @@
+# your override should supply an envName
+envName: null
+
+# if set, override all Applications to use this project
+projectOverride: null
+
+
+default:
+  project:
+    destinations: |
+      - namespace: {{ $.Values.default.app.destination.namespace | required "Missing proj dest namespace"}}
+        server: {{ $.Values.default.app.destination.server | required "Missing proj dest server" }}
+  app:
+    enableAutoSync: null
+    autoSyncPrune: true
+    destination:
+      namespace: null
+      server: null
+    project: null
+    source:
+      path: null
+      repoURL: null
+      targetRevision: HEAD
+
+      extraSourceFields: |
+        helm:
+          valueFiles:
+          - {{ $.Values.envName }}-values.yaml
+      #  kustomize:
+      #    namePrefix: prod-
+    #extraFields: |
+    #  Default fields you want on all applications, unless the app individually overrides
+
+projects:
+
+  auth:
+    description: 'auth services -- api gateway, auth'
+    sourceRepos:
+    - https://MY_APPS_REPOSITORY/auth/*
+
+  onboarding:
+    description: 'onboarding services -- user PII, etc'
+    sourceRepos:
+    - https://MY_APPS_REPOSITORY/onboarding/*
+
+applications:
+
+  pdf-service:
+    enabled: false
+    destination:
+      namespace: null
+      server: null
+    project: onboarding
+    source:
+      path: pdf-service
+      repoURL: https://MY_APPS_REPOSITORY/onboarding/cd-pdf-service.git
+
+    # ignore diffs in replicas since we're doing HPA
+    extraFields: |
+      ignoreDifferences:
+      - group: apps
+        kind: Deployment
+        jsonPointers:
+        - /spec/replicas
+
+  mailqueue:
+    enabled: false
+    destination:
+      namespace: null
+      server: null
+    project: onboarding
+    source:
+      path: mailqueue
+      repoURL: https://MY_APPS_REPOSITORY/auth/cd-mailqueue.git
+
+  api-gateway:
+    enabled: false
+    destination:
+      namespace: null
+      server: null
+    project: auth
+    source:
+      path: api-gateway
+      repoURL: https://MY_APPS_REPOSITORY/auth/cd-api-gateway.git
+
+  auth-service:
+    enabled: false
+    destination:
+      namespace: null
+      server: null
+    project: auth
+    source:
+      path: auth-service
+      repoURL: https://MY_APPS_REPOSITORY/auth/cd-auth-service.git

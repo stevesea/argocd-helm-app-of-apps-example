@@ -1,0 +1,24 @@
+envName: staging
+
+default:
+  app:
+    destination:
+      namespace: staging
+      server: https://kubernetes.default.svc
+    project: infra
+    source:
+      targetRevision: staging
+
+
+applications:
+  k8s-service-accounts:
+    enabled: true
+    enableAutoSync: true
+
+  service-discovery:
+    enabled: true
+    enableAutoSync: true
+
+  infra-svc:
+    enabled: true
+    enableAutoSync: true

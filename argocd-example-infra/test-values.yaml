@@ -1,0 +1,24 @@
+envName: test
+
+default:
+  app:
+    destination:
+      namespace: test
+      server: https://kubernetes.default.svc
+    project: infra
+    source:
+      targetRevision: test
+
+
+applications:
+  k8s-service-accounts:
+    enabled: true
+    enableAutoSync: true
+
+  service-discovery:
+    enabled: true
+    enableAutoSync: true
+
+  infra-svc:
+    enabled: false
+    enableAutoSync: true

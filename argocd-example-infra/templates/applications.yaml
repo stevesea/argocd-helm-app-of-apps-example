@@ -1,0 +1,37 @@
+{{- range $key,$val := .Values.applications }}
+{{- if $val.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ required "A valid envName is required" $.Values.envName }}-{{ $key }}
+spec:
+  destination:
+    namespace: {{ $val.destination.namespace | default $.Values.default.app.destination.namespace | required (printf "No destination.namespace specified for %s" $key ) }}
+    server: {{ $val.destination.server | default $.Values.default.app.destination.server | required (printf "No destination.server specified for %s" $key ) }}
+{{- if $.Values.projectOverride }}
+  project: {{ $.Values.projectOverride }}
+{{- else }}
+  project: {{ $.Values.envName }}-{{ $val.project | default $.Values.default.app.project | required (printf "No project specified for %s" $key ) }}
+{{- end }}
+{{- if $val.enableAutoSync | default $.Values.default.app.enableAutoSync }}
+  syncPolicy:
+    automated:
+      prune: {{ $val.autoSyncPrune | default $.Values.default.app.autoSyncPrune | default true }}
+{{- end }}
+  source:
+    path: {{ tpl $val.source.path $ }}
+    repoURL: {{ $val.source.repoURL | default $.Values.default.app.source.repoURL | required (printf "No source.repoURL specified for %s" $key ) }}
+    targetRevision: {{ $val.source.targetRevision | default $.Values.default.app.source.targetRevision | required (printf "No source.targetRevision specified for %s" $key ) }}
+{{- if $val.source.extraSourceFields }}
+{{ tpl $val.source.extraSourceFields $ | indent 4 }}
+{{- else if $.Values.default.app.source.extraSourceFields }}
+{{ tpl $.Values.default.app.source.extraSourceFields $ | indent 4 }}
+{{- end }}
+{{- if $val.extraFields }}
+{{ tpl $val.extraFields $ | indent 2 }}
+{{- else if $.Values.default.app.extraFields }}
+{{ tpl $.Values.default.app.extraFields $ | indent 2 }}
+{{- end }}
+{{- end }}
+{{- end }}

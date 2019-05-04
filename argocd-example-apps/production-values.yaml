@@ -1,0 +1,26 @@
+envName: production
+
+default:
+  app:
+    destination:
+      namespace: production
+      server: https://kubernetes.default.svc
+    source:
+      targetRevision: production
+
+applications:
+  pdf-service:
+    enabled: true
+    enableAutoSync: true
+
+  mailqueue:
+    enabled: true
+    enableAutoSync: true
+
+  api-gateway:
+    enabled: true
+    enableAutoSync: true
+
+  auth-service:
+    enabled: true
+    enableAutoSync: true

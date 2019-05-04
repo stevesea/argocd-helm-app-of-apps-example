@@ -1,0 +1,23 @@
+{{- if not $.Values.projectOverride }}
+{{- range $key,$val := .Values.projects }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ required "A valid envName is required" $.Values.envName }}-{{ $key }}
+spec:
+{{- if $val.extraFields }}
+{{ tpl $val.extraFields $ | indent 2 }}
+{{- end }}
+  description: {{ tpl $val.description $ }}
+  sourceRepos:
+{{ toYaml $val.sourceRepos | indent 4 }}
+{{- if $val.destinations }}
+  destinations:
+{{ tpl $val.destinations $ | indent 4 }}
+{{- else if $.Values.default.project.destinations }}
+  destinations:
+{{ tpl $.Values.default.project.destinations $ | indent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

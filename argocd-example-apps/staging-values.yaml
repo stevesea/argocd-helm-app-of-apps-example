@@ -1,0 +1,26 @@
+envName: staging
+
+default:
+  app:
+    destination:
+      namespace: staging
+      server: https://kubernetes.default.svc
+    source:
+      targetRevision: staging
+
+applications:
+  pdf-service:
+    enabled: true
+    enableAutoSync: true
+
+  mailqueue:
+    enabled: true
+    enableAutoSync: true
+
+  api-gateway:
+    enabled: true
+    enableAutoSync: true
+
+  auth-service:
+    enabled: true
+    enableAutoSync: true
