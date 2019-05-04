@@ -5,10 +5,13 @@ This repository contains an example of a Helm chart and templates for creating a
 ## Links to things I wish I had when I began learning Kubernetes
 
 * [Pulumi's Kubernetes the Prod Way](https://pulumi.io/quickstart/k8s-the-prod-way/index.html)
+
   A great example of how to think about your platform, and the reasoning behind splitting your deployments into groups based on Risk & Functionality.
 * [Cloud Native Devops with Kubernetes (free ebook)](https://www.nginx.com/resources/library/cloud-native-devops-with-kubernetes/)
+
   I really like how this is presents the information -- lots of k8s resources focus on 'how', but this covers the 'why' and puts it into context well.
 * [The State of Kubernetes Configuration Management](https://blog.argoproj.io/the-state-of-kubernetes-configuration-management-d8b06c1205)
+
   A good discussion of the pros/cons of Helm, Kustomize, etc.
 
 
