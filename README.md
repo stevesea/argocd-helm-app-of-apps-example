@@ -56,29 +56,36 @@ This repository holds one example of how to manage one aspect of Continuous Depl
 
 ### Context
 
-We have a couple dozen microservices. An 'environment' is a cluster+namespace. For example, the 'test' environment is all of our services deployed to a 'test' namespace in a particular cluster.
+We have a couple dozen microservices. An 'environment' is a cluster+namespace to which our services have been deployed. For example, the 'test' environment is all of our services deployed to a 'test' namespace in a particular cluster.
 
 #### Repositories
 We split our microservice source code and the kubernetes manifests into separate repositories (go [here](https://argoproj.github.io/argo-cd/user-guide/best_practices/) for discussion of why that's useful) -- an 'application' repository and a 'deployment' repository.
 
-Repository layout:
-* platform
-  * apps
-    * $SVC -- the application repository
-    * cd-$SVC -- the deployment repository for $SVC
-  * infra
-    * $SVC
-    * cd-$SVC
+Example repository layout:
+* platform/
+  * apps/
+    * auth/ -- auth-related application & deployment repos
+      * $SVC -- the application repository
+      * cd-$SVC -- the deployment repository for $SVC
+    * onboarding/ -- user onboarding related application and deployment repos
+      * $SVC -- the application repository
+      * cd-$SVC -- the deployment repository for $SVC
+  * infra/
+    * utils/ -- general utilities (Storage class config, service-discovery helpers, logging & monitoring related things, etc)
+      * $SVC
+      * cd-$SVC
+    * identity/ -- identity-related stuff in a subgroup to help isolate RBAC rules for it
+      * service-accounts/ -- manifests for creating the k8s service accounts
 
 #### Branching Strategy and CI/CD Pipeline
 
-You have a handful of different strategies for configure ArgoCD to [track changes in your git repositories](https://argoproj.github.io/argo-cd/user-guide/tracking_strategies/). I've chosen to do branch tracking.
+There are a handful of different strategies for configure ArgoCD to [track changes in your git repositories](https://argoproj.github.io/argo-cd/user-guide/tracking_strategies/). I've chosen to do branch tracking.
 
-In my application repositories, we use github-flow like branching. Short-lived feature branches off of master for development, master should always be an a production-ready state. Occasionally, we'll have hotfix/release branches, but those should be very rare.
+In my application repositories, we use github-flow like branching. Short-lived feature branches off of `master` for development, `master` should always be an a production-ready state. Occasionally, we'll have hotfix/release branches, but those should be very rare.
 
 In my deployment repositories, I have specifically named branches for each target environment -- `test` for test env, `staging` for staging env, etc. Developers create feature branches off of `master`, and create merge requests to come back to master. The `master` branch is sync'd to development environments, but should be in a state that is ready for production.
 
-Developers interact with the different environments via Merge Requests.
+Developers interact with the different environments via git through Merge Requests. They'll be granted read-only access to ArgoCD itself to monitor the target environments.
 
 To fix a bug and deploy the fix to the 'test' environment:
 * The developer makes a bugfix on a feature branch in their application repository, and creates a Merge Request to the master.
