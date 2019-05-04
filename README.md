@@ -134,4 +134,140 @@ The templates are driven by the maps in the values.yaml files -- they contains a
     - [test-values.yaml](argocd-example-apps/test-values.yaml)
     - [values.yaml](argocd-example-apps/values.yaml)
 
-(above created with md-file-tree)
+(above created with [md-file-tree](https://github.com/michalbe/md-file-tree))
+
+### Example output manifests:
+
+Run `helm template argocd-example-apps -f argocd-example-apps/test-values.yaml`
+
+You'll get this output:
+
+```yaml
+---
+# Source: argocd-example-apps/templates/projects.yaml
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: test-auth
+spec:
+  description: auth services -- api gateway, auth
+  sourceRepos:
+    - https://MY_APPS_REPOSITORY/auth/*
+
+  destinations:
+    - namespace: test
+      server: https://kubernetes.default.svc
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: test-onboarding
+spec:
+  description: onboarding services -- user PII, etc
+  sourceRepos:
+    - https://MY_APPS_REPOSITORY/onboarding/*
+
+  destinations:
+    - namespace: test
+      server: https://kubernetes.default.svc
+
+
+
+---
+# Source: argocd-example-apps/templates/applications.yaml
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test-api-gateway
+spec:
+  destination:
+    namespace: test
+    server: https://kubernetes.default.svc
+  project: test-auth
+  syncPolicy:
+    automated:
+      prune: true
+  source:
+    path: api-gateway
+    repoURL: https://MY_APPS_REPOSITORY/auth/cd-api-gateway.git
+    targetRevision: test
+    helm:
+      valueFiles:
+      - test-values.yaml
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test-auth-service
+spec:
+  destination:
+    namespace: test
+    server: https://kubernetes.default.svc
+  project: test-auth
+  syncPolicy:
+    automated:
+      prune: true
+  source:
+    path: auth-service
+    repoURL: https://MY_APPS_REPOSITORY/auth/cd-auth-service.git
+    targetRevision: test
+    helm:
+      valueFiles:
+      - test-values.yaml
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test-mailqueue
+spec:
+  destination:
+    namespace: test
+    server: https://kubernetes.default.svc
+  project: test-onboarding
+  syncPolicy:
+    automated:
+      prune: true
+  source:
+    path: mailqueue
+    repoURL: https://MY_APPS_REPOSITORY/auth/cd-mailqueue.git
+    targetRevision: test
+    helm:
+      valueFiles:
+      - test-values.yaml
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test-pdf-service
+spec:
+  destination:
+    namespace: test
+    server: https://kubernetes.default.svc
+  project: test-onboarding
+  syncPolicy:
+    automated:
+      prune: true
+  source:
+    path: pdf-service
+    repoURL: https://MY_APPS_REPOSITORY/onboarding/cd-pdf-service.git
+    targetRevision: test
+    helm:
+      valueFiles:
+      - test-values.yaml
+
+  ignoreDifferences:
+  - group: apps
+    kind: Deployment
+    jsonPointers:
+    - /spec/replicas
+
+
+```
