@@ -2,7 +2,7 @@
 
 This repository contains an example of a Helm chart and templates for creating an environment-specific collection of ArgoCD Application/AppProject CRDs.
 
-## Links to things I wish I had when I began learning Kubernetes
+## Links to information I wish I known when I began learning Kubernetes
 
 * [Pulumi's Kubernetes the Prod Way](https://pulumi.io/quickstart/k8s-the-prod-way/index.html)
 
