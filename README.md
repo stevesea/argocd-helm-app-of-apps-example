@@ -40,7 +40,7 @@ ArgoCD is quite new (just like everything else Kubernetes-related), but has an a
 
 ## Things not covered in this example
 
-This example is currently only focused on the problem of generating the Application CRDs. I plan to expand it bootstrap an argocd cluster, and to deploy an actual working collection of services ... but it doesn't do that now.
+This example is currently only focused on the problem of generating the Application CRDs. I plan to expand it to cover bootstrapping an argocd cluster, and to deploy an actual working collection of services ... but it doesn't do that now.
 
 Other critical details you'll need to figure out to use ArgoCD, but which aren't covered by this example:
 * deploying ArgoCD itself.
