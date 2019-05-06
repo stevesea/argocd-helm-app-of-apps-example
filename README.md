@@ -79,9 +79,9 @@ Example repository layout:
 
 There are a handful of different strategies for configuring ArgoCD to [track changes in your git repositories](https://argoproj.github.io/argo-cd/user-guide/tracking_strategies/). I've chosen to do branch tracking.
 
-In my application repositories, we use github-flow like branching. Short-lived feature branches off of `master` for development, `master` should always be an a production-ready state. Occasionally, we'll have hotfix/release branches, but those should be very rare.
+In my application repositories, we use github-flow like branching. The `master` branch should always be in a production-ready state. Short-lived feature branches off of `master` for new features and bugfixes. Occasionally, we'll have hotfix/release branches -- those should be very rare.
 
-In my deployment repositories, I have specifically named branches for each target environment -- `test` for test env, `staging` for staging env, etc. Developers create feature branches off of `master`, and create merge requests to come back to master. The `master` branch is sync'd to development environments, but should be in a state that is ready for production.
+In my deployment repositories, I have specifically named branches for each target environment -- `test` for test env, `staging` for staging env, etc. The `master` branch should still always be production-ready -- the `master` branch is synced to developer environments. When Developers/QA are ready to push their changes to a wider audience, they create merge requests from master to the target environment's branch.
 
 Developers interact with the different environments via git through Merge Requests. Through SSO, they'll be granted read-only access to ArgoCD to monitor the target environments.
 
