@@ -1,6 +1,6 @@
 # Overview
 
-This repository contains an example of a Helm chart and templates for creating an environment-specific collection of ArgoCD Application/AppProject CRDs.
+This repository contains an example of a Helm chart and templates for creating an environment-specific collection of Argo CD Application/AppProject CRDs.
 
 ## Links to information I wish I knew when I began learning Kubernetes
 
@@ -16,44 +16,44 @@ This repository contains an example of a Helm chart and templates for creating a
   A good discussion of the pros/cons of Helm, Kustomize, etc.
 
 
-## ArgoCD
+## Argo CD
 
-[ArgoCD](https://github.com/argoproj/argo-cd) is a GitOps tool for Continuous Deployment. ArgoCD will compare the Kubernetes manifests in a git repository to the manifests it reads in your Kubernetes cluster, can synchronize those manifests from git into Kubernetes, and helps you monitor the state of your services in Kubernetes.
+[Argo CD](https://github.com/argoproj/argo-cd) is a GitOps tool for Continuous Deployment. Argo CD will compare the Kubernetes manifests in a git repository to the manifests it reads in your Kubernetes cluster, can synchronize those manifests from git into Kubernetes, and helps you monitor the state of your services in Kubernetes.
 
-ArgoCD can deploy your Kubernetes manifests using any of the usual methods -- Helm, Kustomize, ksonnet, jsonnet, or simple k8s manifests. I really like this aspect of ArgoCD. It gives you the freedom to use whichever tool is right for the job at hand -- for simple things, just use manifests; to reduce boilerplate, use kustomize; for tasks that require the complexity of templates (e.g. loops, if/else, lots of params), use helm or jsonnet.
+Argo CD can deploy your Kubernetes manifests using any of the usual methods -- Helm, Kustomize, ksonnet, jsonnet, or simple k8s manifests. I really like this aspect of Argo CD. It gives you the freedom to use whichever tool is right for the job at hand -- for simple things, just use manifests; to reduce boilerplate, use kustomize; for tasks that require the complexity of templates (e.g. loops, if/else, lots of params), use helm or jsonnet.
 
-ArgoCD is mostly stateless, you define the desired configuration of your cluster through Kubernetes manifests -- [ConfigMaps, Secrets, and a couple Custom Resource Definitions (CRDs)](https://argoproj.github.io/argo-cd/operator-manual/declarative-setup/).
+Argo CD is mostly stateless, you define the desired configuration of your cluster through Kubernetes manifests -- [ConfigMaps, Secrets, and a couple Custom Resource Definitions (CRDs)](https://argoproj.github.io/argo-cd/operator-manual/declarative-setup/).
 
-ConfigMaps & Secrets -- you configure ArgoCD itself through its ConfigMaps and Secrets. Through these, you define the git repositories, target clusters, credentials for git/cluster, and RBAC rules for ArgoCD and your projects.
+ConfigMaps & Secrets -- you configure Argo CD itself through its ConfigMaps and Secrets. Through these, you define the git repositories, target clusters, credentials for git/cluster, and RBAC rules for Argo CD and your projects.
 
-[AppProject CRD](https://argoproj.github.io/argo-cd/operator-manual/project.yaml) -- a 'project' in ArgoCD defines which git repositories should be synched to which clusters, and RBAC rules.
+[AppProject CRD](https://argoproj.github.io/argo-cd/operator-manual/project.yaml) -- a 'project' in Argo CD defines which git repositories should be synched to which clusters, and RBAC rules.
 
 [Application CRD](https://argoproj.github.io/argo-cd/operator-manual/application.yaml) -- an 'application' defines a single git source repository and a target Kubernetes cluster, and parameters to apply to the templates.
 
 # Problem #1 -- Application of Applications
 
-Similar to Kubernetes itself, ArgoCD doesn't enforce strong opinions about how you should use ArgoCD. And also similar to Kubernetes, making the transition from "Hey, this tool is neat, I think we should use it!" to actually putting it into practice in a maintainable way requires a significant amount of complex decisions.
+Similar to Kubernetes itself, Argo CD doesn't enforce strong opinions about how you should use Argo CD. And also similar to Kubernetes, making the transition from "Hey, this tool is neat, I think we should use it!" to actually putting it into practice in a maintainable way requires a significant amount of complex decisions.
 
-With ArgoCD, you'll need to create an Application CRD for each set of manifests you want to deploy into your cluster(s). Or, to state the problem a different way... for a given microservice, you'll likely deploy it to many different places -- you might have test, staging, production environments. You'll need a different CRD for each different deployment. How do you manage the parameterization of `N` Applications across `M` environments? How do you promote your application from test to staging, and from staging to production? How does your CI/CD process fit into all this?
+With Argo CD, you'll need to create an Application CRD for each set of manifests you want to deploy into your cluster(s). Or, to state the problem a different way... for a given microservice, you'll likely deploy it to many different places -- you might have test, staging, production environments. You'll need a different CRD for each different deployment. How do you manage the parameterization of `N` Applications across `M` environments? How do you promote your application from test to staging, and from staging to production? How does your CI/CD process fit into all this?
 
-ArgoCD is quite new (just like everything else Kubernetes-related), but has an active community. Emerging patterns within the community are [declarative setup](https://argoproj.github.io/argo-cd/operator-manual/declarative-setup/) and ['application of applications'](https://argoproj.github.io/argo-cd/operator-manual/cluster-bootstrapping/) -- you use ArgoCD to manage ArgoCD itself, and you define Application CRDs that create other Application CRDs.
+Argo CD is quite new (just like everything else Kubernetes-related), but has an active community. Emerging patterns within the community are [declarative setup](https://argoproj.github.io/argo-cd/operator-manual/declarative-setup/) and ['application of applications'](https://argoproj.github.io/argo-cd/operator-manual/cluster-bootstrapping/) -- you use Argo CD to manage Argo CD itself, and you define Application CRDs that create other Application CRDs.
 
 
 ## Things not covered in this example
 
-This example is currently only focused on the problem of generating the Application CRDs. I plan to expand it to cover bootstrapping an argocd cluster, and to deploy an actual working collection of services ... but it doesn't do that now.
+This example is currently only focused on the problem of generating the Application CRDs. I plan to expand it to cover bootstrapping an Argo CD cluster, and to deploy an actual working collection of services ... but it doesn't do that now.
 
-Other critical details you'll need to figure out to use ArgoCD, but which aren't covered by this example:
-* deploying ArgoCD itself.
+Other critical details you'll need to figure out to use Argo CD, but which aren't covered by this example:
+* deploying Argo CD itself.
 * CI/CD pipelines
-* RBAC settings for ArgoCD or the AppProjects.
+* RBAC settings for Argo CD or the AppProjects.
 * actual working example microservice projects and build pipelines for same.
-* different clusters per env -- the values files all use `https://kubernetes.default.svc` as the destination (this is the local cluster that ArgoCD is running within), to deploy to different clusters per env, you'd change that to the cluster IP of your target cluster.
+* different clusters per env -- the values files all use `https://kubernetes.default.svc` as the destination (this is the local cluster that Argo CD is running within), to deploy to different clusters per env, you'd change that to the cluster IP of your target cluster.
 
 
 ## The Context of this Example
 
-This repository holds one example of how to manage a single aspect of Continuous Deployment with ArgoCD, and in one particular way -- a helm template that creates a bunch of Application/AppProject CRDs for the different target environments. It fit my needs, and supported the developer workflow I found convenient. Your needs will be different, and you'll likely weigh the factors of your CD process differently than I did.
+This repository holds one example of how to manage a single aspect of Continuous Deployment with Argo CD, and in one particular way -- a helm template that creates a bunch of Application/AppProject CRDs for the different target environments. It fit my needs, and supported the developer workflow I found convenient. Your needs will be different, and you'll likely weigh the factors of your CD process differently than I did.
 
 We have a couple dozen microservices. An 'environment' is a cluster+namespace to which our services have been deployed. For example, the 'test' environment is all of our services deployed to a 'test' namespace in a particular cluster.
 
@@ -80,13 +80,13 @@ Example repository layout:
 
 ### Branching Strategy and CI/CD Pipeline
 
-There are a handful of different strategies for configuring ArgoCD to [track changes in your git repositories](https://argoproj.github.io/argo-cd/user-guide/tracking_strategies/). I've chosen to do branch tracking.
+There are a handful of different strategies for configuring Argo CD to [track changes in your git repositories](https://argoproj.github.io/argo-cd/user-guide/tracking_strategies/). I've chosen to do branch tracking.
 
 In my application repositories, I use github-flow like branching. The `master` branch should always be in a production-ready state. Short-lived feature branches are created off of `master` for new features and bugfixes. Occasionally, we'll have hotfix/release branches -- those are very rare, but sometimes necessary.
 
-In my deployment repositories, I have specifically named branches for each target environment. The `master` branch should always be kept production-ready. An ArgoCD deployment syncs the `master` branch is to developer environments. A 'nonprod' ArgoCD deployment syncs `test` branch to test cluster and `staging` branch to the staging cluster. A 'prod' ArgoCD deployment syncs `production` branch to the production cluster. When Developers/QA are ready to push their changes to a wider audience, they create merge requests from master to the target environment's branch.
+In my deployment repositories, I have specifically named branches for each target environment. The `master` branch should always be kept production-ready. An Argo CD deployment syncs the `master` branch is to developer environments. A 'nonprod' Argo CD deployment syncs `test` branch to test cluster and `staging` branch to the staging cluster. A 'prod' Argo CD deployment syncs `production` branch to the production cluster. When Developers/QA are ready to push their changes to a wider audience, they create merge requests from master to the target environment's branch.
 
-Developers interact with the different environments via git through Merge Requests. Through SSO, they'll be granted read-only access to ArgoCD to monitor the target environments.
+Developers interact with the different environments via git through Merge Requests. Through SSO, they'll be granted read-only access to Argo CD to monitor the target environments.
 
 To fix a bug and deploy the fix to the 'test' environment:
 * The developer makes a bugfix on a feature branch in their application repository, and creates a Merge Request to master.
@@ -105,12 +105,12 @@ To fix a bug and deploy the fix to the 'test' environment:
     * runs validation on the manifests -- helm lint, kubeval, etc
     * if helm, packages the manifests and pushes to a helm repository.
     * merges the manifests from the `master` branch to the `test` branch
-    * ArgoCD for the test environment is setup to auto-sync the manifests fromt he `test` branch into the Kubernetes cluster.
+    * Argo CD for the test environment is setup to auto-sync the manifests fromt he `test` branch into the Kubernetes cluster.
 
 To promote a change from the `test` to `staging` environments (or `staging` to `production`):
 * developer/qa creates a Merge Request in the deployment repository from source to target branch
 * upon MR approval (qa and business stake holders are mandatory approvers), the MR is merged to target branch
-* ArgoCD for the target environment is setup to auto-sync the manifests from the target branch into the appropriate Kubernetes cluster.
+* Argo CD for the target environment is setup to auto-sync the manifests from the target branch into the appropriate Kubernetes cluster.
 
 ## Finally, the example itself...
 
@@ -138,7 +138,7 @@ The templates are driven by the maps in the values.yaml files -- they contains a
     - [test-values.yaml](argocd-example-apps/test-values.yaml)
     - [values.yaml](argocd-example-apps/values.yaml)
 
-To make use of these charts, I create a set of ArgoCD Application CRDs. For example, with my argocd-test deployment, I'd deploy the following CRDs into my argocd namespace:
+To make use of these charts, I create a set of Argo CD Application CRDs. For example, with my argocd-test deployment, I'd deploy the following CRDs into my argocd namespace:
 
 ```yaml
 ---
@@ -147,7 +147,7 @@ kind: AppProject
 metadata:
   name: argocd
 spec:
-  description: project for management of ArgoCD itself
+  description: project for management of Argo CD itself
   # some of my apps within argocd project need to create cluster resources
   clusterResourceWhitelist:
   - group: '*'
