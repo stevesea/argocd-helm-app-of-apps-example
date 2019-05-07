@@ -20,7 +20,7 @@ This repository contains an example of a Helm chart and templates for creating a
 
 [ArgoCD](https://github.com/argoproj/argo-cd) is a GitOps tool for Continuous Deployment. ArgoCD will compare the Kubernetes manifests in a git repository to the manifests it reads in your Kubernetes cluster, can synchronize those manifests from git into Kubernetes, and helps you monitor the state of your services in Kubernetes.
 
-ArgoCD can deploy your Kubernetes manifests using any of the current popular methods -- Helm, Kustomize, ksonnet, jsonnet, or simple k8s manifests. I really like this aspect of ArgoCD. It gives you the freedom to use whichever tool is right for the job at hand -- for simple things, just use manifests; to reduce boilerplate, use kustomize; for tasks that require the complexity of templates (e.g. loops, if/else, lots of params), use helm or jsonnet.
+ArgoCD can deploy your Kubernetes manifests using any of the usual methods -- Helm, Kustomize, ksonnet, jsonnet, or simple k8s manifests. I really like this aspect of ArgoCD. It gives you the freedom to use whichever tool is right for the job at hand -- for simple things, just use manifests; to reduce boilerplate, use kustomize; for tasks that require the complexity of templates (e.g. loops, if/else, lots of params), use helm or jsonnet.
 
 ArgoCD is mostly stateless, you define the desired configuration of your cluster through Kubernetes manifests -- [ConfigMaps, Secrets, and a couple Custom Resource Definitions (CRDs)](https://argoproj.github.io/argo-cd/operator-manual/declarative-setup/).
 
@@ -32,9 +32,9 @@ ConfigMaps & Secrets -- you configure ArgoCD itself through its ConfigMaps and S
 
 # Problem #1 -- Application of Applications
 
-Similar to Kubernetes itself, ArgoCD doesn't enforce strong opinions about how you should use ArgoCD. And also similar to Kubernetes, making the transition from "Hey, this tool is neat, I think we should use it!" to actually putting it into practice in a maintainable way requires significant effort.
+Similar to Kubernetes itself, ArgoCD doesn't enforce strong opinions about how you should use ArgoCD. And also similar to Kubernetes, making the transition from "Hey, this tool is neat, I think we should use it!" to actually putting it into practice in a maintainable way requires a significant amount of complex decisions.
 
-With ArgoCD, you'll need to create an Application CRD for each set of manifests you want to deploy into your cluster(s). Or, to state the problem a different way... for a given microservice, you'll likely deploy it to many different places -- you might have test, staging, production environments. You'll need a different CRD for each different deployment. How do you manage the parameterization of that? How do you promote your application from test to staging, and from staging to production?
+With ArgoCD, you'll need to create an Application CRD for each set of manifests you want to deploy into your cluster(s). Or, to state the problem a different way... for a given microservice, you'll likely deploy it to many different places -- you might have test, staging, production environments. You'll need a different CRD for each different deployment. How do you manage the parameterization of `N` Applications across `M` environments? How do you promote your application from test to staging, and from staging to production? How does your CI/CD process fit into all this?
 
 ArgoCD is quite new (just like everything else Kubernetes-related), but has an active community. Emerging patterns within the community are [declarative setup](https://argoproj.github.io/argo-cd/operator-manual/declarative-setup/) and ['application of applications'](https://argoproj.github.io/argo-cd/operator-manual/cluster-bootstrapping/) -- you use ArgoCD to manage ArgoCD itself, and you define Application CRDs that create other Application CRDs.
 
@@ -58,7 +58,9 @@ This repository holds one example of how to manage a single aspect of Continuous
 We have a couple dozen microservices. An 'environment' is a cluster+namespace to which our services have been deployed. For example, the 'test' environment is all of our services deployed to a 'test' namespace in a particular cluster.
 
 ### Repositories
-We split our microservice source code and the kubernetes manifests into separate repositories (go [here](https://argoproj.github.io/argo-cd/user-guide/best_practices/) for discussion of why that's useful) -- an 'application' repository and a 'deployment' repository.
+We split our microservice source code and the kubernetes manifests into two separate repositories (go [here](https://argoproj.github.io/argo-cd/user-guide/best_practices/) for discussion of why that's useful) -- an 'application' repository and a 'deployment' repository.
+
+Some things may only have 'deployment' repositories -- 3rd party applications, k8s manifests that are useful to combine into a logical group, etc.
 
 Example repository layout:
 * platform/
@@ -80,9 +82,9 @@ Example repository layout:
 
 There are a handful of different strategies for configuring ArgoCD to [track changes in your git repositories](https://argoproj.github.io/argo-cd/user-guide/tracking_strategies/). I've chosen to do branch tracking.
 
-In my application repositories, we use github-flow like branching. The `master` branch should always be in a production-ready state. Short-lived feature branches off of `master` for new features and bugfixes. Occasionally, we'll have hotfix/release branches -- those should be very rare.
+In my application repositories, I use github-flow like branching. The `master` branch should always be in a production-ready state. Short-lived feature branches are created off of `master` for new features and bugfixes. Occasionally, we'll have hotfix/release branches -- those are very rare, but sometimes necessary.
 
-In my deployment repositories, I have specifically named branches for each target environment -- `test` for test env, `staging` for staging env, etc. The `master` branch should still always be production-ready -- the `master` branch is synced to developer environments. When Developers/QA are ready to push their changes to a wider audience, they create merge requests from master to the target environment's branch.
+In my deployment repositories, I have specifically named branches for each target environment. The `master` branch should always be kept production-ready. An ArgoCD deployment syncs the `master` branch is to developer environments. A 'nonprod' ArgoCD deployment syncs `test` branch to test cluster and `staging` branch to the staging cluster. A 'prod' ArgoCD deployment syncs `production` branch to the production cluster. When Developers/QA are ready to push their changes to a wider audience, they create merge requests from master to the target environment's branch.
 
 Developers interact with the different environments via git through Merge Requests. Through SSO, they'll be granted read-only access to ArgoCD to monitor the target environments.
 
@@ -90,20 +92,20 @@ To fix a bug and deploy the fix to the 'test' environment:
 * The developer makes a bugfix on a feature branch in their application repository, and creates a Merge Request to master.
 * on MR approval, the MR is merged to master.
 * on merge to master, the CI pipeline is kicked off.
-* the CI pipeline in the application repository does the following
-  * calculates SemVer via [gitversion](https://gitversion.readthedocs.io)
-  * builds the docker image and tags with SemVer
-  * pushes to the docker registry
-  * tags the application repository with the SemVer
-  * runs static analysis, uploads BOM, etc
-  * triggers CD pipeline in the deployment repository -- passing SemVer, image name, etc
-* the CD pipeline in the deployment repository does the following
-  * updates the deployment manifests for the service on the `master` branch
-  * tags the deployment repository with the SemVer
-  * runs validation on the manifests -- helm lint, kubeval, etc
-  * if helm, packages the manifests and pushes to a helm repository.
-  * merges the manifests from the `master` branch to the `test` branch
-  * ArgoCD for the test environment is setup to auto-sync the manifests fromt he `test` branch into the Kubernetes cluster.
+  * the CI pipeline in the application repository does the following
+    * calculates SemVer via [gitversion](https://gitversion.readthedocs.io)
+    * builds the docker image and tags with SemVer
+    * pushes to the docker registry
+    * tags the application repository with the SemVer
+    * runs static analysis, uploads BOM, etc
+    * triggers CD pipeline in the deployment repository -- passing SemVer, image name, etc
+  * the CD pipeline in the deployment repository does the following
+    * updates the deployment manifests for the service on the `master` branch
+    * tags the deployment repository with the SemVer
+    * runs validation on the manifests -- helm lint, kubeval, etc
+    * if helm, packages the manifests and pushes to a helm repository.
+    * merges the manifests from the `master` branch to the `test` branch
+    * ArgoCD for the test environment is setup to auto-sync the manifests fromt he `test` branch into the Kubernetes cluster.
 
 To promote a change from the `test` to `staging` environments (or `staging` to `production`):
 * developer/qa creates a Merge Request in the deployment repository from source to target branch
