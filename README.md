@@ -84,7 +84,7 @@ There are a handful of different strategies for configuring Argo CD to [track ch
 
 In my application repositories, I use github-flow like branching. The `master` branch should always be in a production-ready state. Short-lived feature branches are created off of `master` for new features and bugfixes. Occasionally, we'll have hotfix/release branches -- those are very rare, but sometimes necessary.
 
-In my deployment repositories, I have specifically named branches for each target environment. The `master` branch should always be kept production-ready. An Argo CD deployment syncs the `master` branch is to developer environments. A 'nonprod' Argo CD deployment syncs `test` branch to test cluster and `staging` branch to the staging cluster. A 'prod' Argo CD deployment syncs `production` branch to the production cluster. When Developers/QA are ready to push their changes to a wider audience, they create merge requests from master to the target environment's branch.
+In my deployment repositories, I have specifically named branches for each target environment. The `master` branch should always be kept production-ready. An Argo CD deployment syncs the `master` branch to developer environments. A 'nonprod' Argo CD deployment syncs `test` branch to test cluster and `staging` branch to the staging cluster. A 'prod' Argo CD deployment syncs `production` branch to the production cluster. When Developers/QA are ready to push their changes to a wider audience, they create merge requests from master to the target environment's branch.
 
 Developers interact with the different environments via git through Merge Requests. Through SSO, they'll be granted read-only access to Argo CD to monitor the target environments.
 
