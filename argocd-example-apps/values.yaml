@@ -7,6 +7,15 @@ projectOverride: null
 
 default:
   project:
+    roles: |
+      - name: read-only
+        description: Read-only privileges within project
+        policies:
+        - p, proj:{{ $.curProjName }}:read-only, applications, get, {{ $.curProjName }}/*, allow
+      - name: ci-role
+        description: Role to allow CICD pipeline to sync apps within project
+        policies:
+        - p, proj:{{ $.curProjName }}:ci-role, applications, sync, {{ $.curProjName }}/*, allow
     destinations: |
       - namespace: {{ $.Values.default.app.destination.namespace | required "Missing proj dest namespace"}}
         server: {{ $.Values.default.app.destination.server | required "Missing proj dest server" }}
@@ -72,6 +81,13 @@ applications:
     source:
       path: mailqueue
       repoURL: https://MY_APPS_REPOSITORY/auth/cd-mailqueue.git
+      # apps can override the default extraSourceFields
+      #
+      extraSourceFields: |
+        helm:
+          valueFiles:
+          - my-app-overrides-{{ $.Values.envName }}-values.yaml
+          - {{ $.Values.envName }}-values.yaml
 
   api-gateway:
     enabled: false

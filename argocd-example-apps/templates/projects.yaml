@@ -1,5 +1,10 @@
 {{- if not $.Values.projectOverride }}
 {{- range $key,$val := .Values.projects }}
+{{- /*
+in order to use tpl within a range, _and_ have the key/val available to sub-templates,
+need to add some variables to the root context.
+*/ -}}
+{{- $_ := set $ "curProjName" (print $.Values.envName "-" $key) }}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
@@ -12,6 +17,13 @@ spec:
   description: {{ tpl $val.description $ }}
   sourceRepos:
 {{ toYaml $val.sourceRepos | indent 4 }}
+{{- if $val.roles }}
+  roles:
+{{ tpl $val.roles $ | indent 4 }}
+{{- else if $.Values.default.project.roles }}
+  roles:
+{{ tpl $.Values.default.project.roles $ | indent 4 }}
+{{- end }}
 {{- if $val.destinations }}
   destinations:
 {{ tpl $val.destinations $ | indent 4 }}
@@ -21,4 +33,3 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
-
