@@ -1,5 +1,13 @@
 # Overview
 
+---
+> **_NOTE:_** **Don't follow this example. Use Application Sets.**
+> 
+> The approach described in this repository was reasonable a couple years ago.  
+> 
+> I'll keep this repository around, since demonstrates some dumb Helm tricks that are sometimes useful
+---
+
 This repository contains an example of a Helm chart and templates for creating an environment-specific collection of Argo CD Application/AppProject CRDs.
 
 ## Links to information I wish I knew when I began learning Kubernetes
